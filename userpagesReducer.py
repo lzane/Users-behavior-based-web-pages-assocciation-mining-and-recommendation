@@ -22,7 +22,6 @@ for line in sys.stdin:
 
     if oldKey and oldKey != ID:
         print oldKey, "\t", json.dumps(urlList)
-        cnt = 0
 
     oldKey = ID
     urlList.append(path)

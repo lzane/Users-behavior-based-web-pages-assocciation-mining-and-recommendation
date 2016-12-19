@@ -7,7 +7,6 @@ Reducer: (user, view page urls list)
 """
 
 import sys
-import json
 
 cnt = 0
 oldKey = None

@@ -2,17 +2,19 @@
 
 """
 ### Recommendation
-- Map: (count,similar page)
-- Reduce: output Top N pages
+- Map: `(pageA '\t' count,pageB)`
+- Reduce: Top-N `(page, similar page array[{url,count},...])`
 """
 
 import sys
+import json
+from operator import itemgetter
 
 # parameter
-TOPNCOUNT = 5
-cnt = 0
+TOPNCOUNT = 3
 
 oldKey = None
+urlList = list()
 
 for line in sys.stdin:
     data_mapped = line.strip().split("\t")
@@ -20,8 +22,24 @@ for line in sys.stdin:
         # Something wrong. Skip this line.
         continue
 
-    count, similar_page = data_mapped
-    print similar_page, "\t", count
-    cnt += 1
-    if cnt == TOPNCOUNT:
-        break
+    target_page, similar_page = data_mapped
+    similar_page = json.loads(similar_page)
+
+    if not similar_page and len(similar_page[0]) != 1:  # Something wrong. Skip this line.
+        continue
+
+    if oldKey and oldKey != target_page:
+        urlList = sorted(urlList, key=itemgetter('count'), reverse=True)
+        max_index = min(TOPNCOUNT, len(urlList))
+        print oldKey, "\t", json.dumps(urlList[:max_index])
+        del urlList[:]
+
+    oldKey = target_page
+    urlList.append(similar_page)
+
+if oldKey is not None:
+    urlList = sorted(urlList, key=itemgetter('count'), reverse=True)
+    max_index = min(TOPNCOUNT, len(urlList))
+    print oldKey, "\t", json.dumps(urlList[:max_index])
+    del urlList[:]
+

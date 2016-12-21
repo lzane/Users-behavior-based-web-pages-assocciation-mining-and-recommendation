@@ -2,30 +2,22 @@
 
 """
 ### Recommendation
-- Map: (count,similar page)
-- Reduce: output Top N pages
+- Map: `(pageA '\t' count,pageB)`
+- Reduce: Top-N `(page, similar page array[{url,count},...])`
 """
 
 import sys
 import json
-
-# parameters:
-targetUrl = "/shuttle/countdown/countdown.html"
-
-
-def find_target(urlA, urlB, innerCount):
-    if urlA == targetUrl:
-        print "{0}\t{1}".format(innerCount, urlB)
-
 
 for line in sys.stdin:
     line = line.strip().split('\t')
     if len(line) != 2:  # something wrong, ignore
         continue
     urlListJson, count = line
+    count = int(count)
     urlList = json.loads(urlListJson)
     if len(urlList) != 2:  # something wrong, ignore
         continue
 
-    find_target(urlList[0], urlList[1], count)
-    find_target(urlList[1], urlList[0], count)
+    print "{0}\t{1}".format(urlList[0], json.dumps({"url": urlList[1], "count": count}))
+    print "{0}\t{1}".format(urlList[1], json.dumps({"url": urlList[0], "count": count}))

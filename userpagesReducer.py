@@ -9,7 +9,7 @@ Reducer: (user, view page urls list)
 import sys
 import json
 
-urlList = list()
+urlSet = set()  # only store unique pages
 oldKey = None
 
 for line in sys.stdin:
@@ -21,10 +21,20 @@ for line in sys.stdin:
     ID, path = data_mapped
 
     if oldKey and oldKey != ID:
-        print oldKey, "\t", json.dumps(urlList)
+        try:  # handle exception
+            res = json.dumps(list(urlSet))
+        except UnicodeDecodeError:
+            continue
+        print oldKey, "\t", res
+        urlSet.clear()
 
     oldKey = ID
-    urlList.append(path)
+    urlSet.add(path)
 
 if oldKey is not None:
-    print oldKey, "\t", json.dumps(urlList)
+    try:
+        res = json.dumps(list(urlSet))
+    except UnicodeDecodeError:
+        pass
+    print oldKey, "\t", res
+    urlSet.clear()

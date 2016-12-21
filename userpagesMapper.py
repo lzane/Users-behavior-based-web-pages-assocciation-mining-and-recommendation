@@ -20,7 +20,10 @@ for line in sys.stdin:
         continue
     res = m.groups()
     IP, identity, username, time, request, status, size = res
-    path = request.split(' ')[1]
+    request = request.split(' ')
+    if len(request) != 3:  # something wrong happens
+        continue
+    path = request[1]
     if path.split('.')[-1] != "html":  # only concentrate on html, ignore css,image etc
         continue
     print "{0}\t{1}".format(IP, path)
